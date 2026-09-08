@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<partial name="_MenuAssets" />
+
+@if (TempData["Success"] is string success)
+{
+    <div class="container-xxl pt-4"><div class="alert alert-success mb-0">@success</div></div>
+}
+
+<section class="home-hero-carousel" aria-label="QIGLO restaurant highlights">
+    <div class="hero-slides" aria-hidden="true">
+        <div class="hero-slide is-active" style="background-image: url('/images/hero/qiglo-hero-fish.png');"></div>
+        <div class="hero-slide" style="background-image: url('/images/menu/pasta.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('/images/menu/chicken.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('/images/menu/burger.jpg');"></div>
+    </div>
+    <div class="hero-shade"></div>
+
+    <div class="home-hero-content">
+        <h1><span>MAKE ROOM</span><strong>FOR MOMENTS.</strong></h1>
+        <p>Fresh plates, thoughtful service and a table that is ready when you are. Reserve in minutes and make your next meal count.</p>
+        <div class="hero-actions">
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Reservations/Create" class="hero-action hero-action-primary">Reserve a table <span aria-hidden="true">↗</span></a>
+                <a asp-controller="Menu" asp-action="Index" class="hero-action hero-action-secondary">Explore the menu <span aria-hidden="true">→</span></a>
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Admin" asp-action="Index" class="hero-action hero-action-primary">Open dashboard <span aria-hidden="true">↗</span></a>
+                <a asp-controller="AdminMenuItems" asp-action="Index" class="hero-action hero-action-secondary">Manage menu <span aria-hidden="true">→</span></a>
+            }
+            else if (User.IsInRole("KitchenStaff"))
+            {
+                <a asp-controller="Kitchen" asp-action="Index" class="hero-action hero-action-primary">Open kitchen board <span aria-hidden="true">↗</span></a>
+            }
+            else if (User.IsInRole("Customer"))
+            {
+                <a asp-controller="Reservations" asp-action="Create" class="hero-action hero-action-primary">Reserve a table <span aria-hidden="true">↗</span></a>
+                <a asp-controller="Menu" asp-action="Index" class="hero-action hero-action-secondary">Explore the menu <span aria-hidden="true">→</span></a>
+            }
+            else
+            {
+                <a asp-controller="Reservations" asp-action="Index" class="hero-action hero-action-primary">View reservations <span aria-hidden="true">↗</span></a>
+                <a asp-controller="Reservations" asp-action="CheckIn" class="hero-action hero-action-secondary">Guest check-in <span aria-hidden="true">→</span></a>
+            }
+        </div>
+    </div>
+
+    <div class="hero-slide-controls" aria-hidden="true">
+        <div class="hero-slide-dots">
+            <span class="is-active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</section>
+
+<div class="container-xxl">
+    <section class="home-favourites home-section" aria-labelledby="favourites-title">
+        <div class="home-display-heading">
+            <div>
+                <span class="home-section-label">CUSTOMER FAVOURITES</span>
+                <h2 id="favourites-title">The plates people<br />come back for.</h2>
+            </div>
+        </div>
+        <div class="home-favourites-intro">
+            <p>A hand-picked QIGLO selection to help guests discover the menu before they reserve.</p>
+            <a asp-controller="Menu" asp-action="Index" class="text-arrow-link">See full menu <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-3"><article class="favourite-card"><img src="~/images/menu/pasta.jpg" alt="QIGLO pasta dish" /><div><span>QIGLO PICK</span><h3>Comfort Pasta</h3><p>Freshly prepared, rich and satisfying.</p><a asp-controller="Menu" asp-action="Index">View menu <b aria-hidden="true">→</b></a></div></article></div>
+            <div class="col-md-6 col-xl-3"><article class="favourite-card"><img src="~/images/menu/chicken.jpg" alt="QIGLO grilled chicken dish" /><div><span>GUEST FAVOURITE</span><h3>Grilled Chicken</h3><p>A comforting plate made for every appetite.</p><a asp-controller="Menu" asp-action="Index">View menu <b aria-hidden="true">→</b></a></div></article></div>
+            <div class="col-md-6 col-xl-3"><article class="favourite-card"><img src="~/images/menu/burger.jpg" alt="QIGLO signature burger" /><div><span>RECOMMENDED</span><h3>Signature Burger</h3><p>Big flavour, crisp textures and a full bite.</p><a asp-controller="Menu" asp-action="Index">View menu <b aria-hidden="true">→</b></a></div></article></div>
+            <div class="col-md-6 col-xl-3"><article class="favourite-card"><img src="~/images/menu/fish.jpg" alt="QIGLO seared fish dish" /><div><span>CHEF'S CHOICE</span><h3>Seared Fish</h3><p>Simple ingredients, beautifully balanced.</p><a asp-controller="Menu" asp-action="Index">View menu <b aria-hidden="true">→</b></a></div></article></div>
+        </div>
+    </section>
+
+    <section class="home-story-teaser full-bleed-section" aria-labelledby="story-title">
+        <div class="home-story-image" role="img" aria-label="Fresh QIGLO pasta dish"></div>
+        <div class="home-story-copy">
+            <span class="home-section-label">THE QIGLO WAY</span>
+            <h2 id="story-title">Good food feels<br /><em>like a welcome.</em></h2>
+            <p>We put care into the details that turn a meal into a moment: generous flavours, attentive people and a dining experience that simply flows.</p>
+            <a asp-controller="Home" asp-action="About" class="text-arrow-link">Meet QIGLO <span aria-hidden="true">→</span></a>
+        </div>
+    </section>
+
+    <section class="dining-journey home-section" aria-labelledby="journey-title">
+        <div class="dining-journey-header">
+            <span class="home-section-label">YOUR DINING JOURNEY</span>
+            <h2 id="journey-title">A better table<br />from the first click.</h2>
+        </div>
+        <ol class="dining-journey-steps">
+            <li><span>01</span><strong>Reserve</strong><small>Find your perfect table.</small></li>
+            <li><span>02</span><strong>Arrive</strong><small>Check in with your QR code.</small></li>
+            <li><span>03</span><strong>Enjoy</strong><small>Follow every order with ease.</small></li>
+            <li><span>04</span><strong>Remember</strong><small>Keep your e-receipt ready.</small></li>
+        </ol>
+        @if (User.IsInRole("Customer"))
+        {
+            <a class="dining-journey-cta" asp-controller="Reservations" asp-action="Create">Start with a table <span aria-hidden="true">↗</span></a>
+        }
+        else if (User.Identity?.IsAuthenticated != true)
+        {
+            <a class="dining-journey-cta" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Reservations/Create">Start with a table <span aria-hidden="true">↗</span></a>
+        }
+        else
+        {
+            <a class="dining-journey-cta" asp-controller="Menu" asp-action="Index">Explore the menu <span aria-hidden="true">→</span></a>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const carousel = document.querySelector('.home-hero-carousel');
+            if (!carousel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const slides = [...carousel.querySelectorAll('.hero-slide')];
+            const dots = [...carousel.querySelectorAll('.hero-slide-dots span')];
+            let current = 0;
+            let timer;
+
+            const showSlide = (next) => {
+                current = (next + slides.length) % slides.length;
+                slides.forEach((slide, index) => slide.classList.toggle('is-active', index === current));
+                dots.forEach((dot, index) => {
+                    const active = index === current;
+                    dot.classList.toggle('is-active', active);
+                });
+            };
+            const restart = () => {
+                window.clearInterval(timer);
+                timer = window.setInterval(() => showSlide(current + 1), 6000);
+            };
+
+            restart();
+        })();
+    </script>
+}

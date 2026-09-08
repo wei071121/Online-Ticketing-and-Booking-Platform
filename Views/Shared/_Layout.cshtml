@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#7b2ff2" />
+    <title>@ViewData["Title"] - QIGLO Restaurant</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800;1,900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/QigloRestaurant.Web.styles.css" asp-append-version="true" />
+</head>
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isHome = currentController == "Home" && currentAction == "Index";
+    var isMenu = currentController == "Menu";
+    var isAbout = currentController == "Home" && currentAction == "About";
+    var isKitchenUser = User.IsInRole("KitchenStaff");
+    var isAdminUser = User.IsInRole("Admin");
+    var isStaffUser = User.IsInRole("Staff");
+    var isCustomerUser = User.IsInRole("Customer");
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var showPublicNavigation = !isAuthenticated || isCustomerUser;
+    var isAuthPage = currentController == "Account" && (currentAction == "Login" || currentAction == "Register");
+    var brandController = isKitchenUser ? "Kitchen" : isAdminUser ? "Admin" : isStaffUser ? "Reservations" : "Home";
+    var brandAction = "Index";
+}
+<body class="@(isHome ? "home-page" : "") @(isAuthPage ? "auth-page" : "")">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header no-print">
+        <nav class="navbar navbar-expand-xl qiglo-nav" aria-label="Main navigation">
+            <div class="container-xxl">
+                <a class="navbar-brand qiglo-brand" asp-controller="@brandController" asp-action="@brandAction" aria-label="QIGLO dashboard">
+                    <span class="qiglo-logo-crop" aria-hidden="true"><img src="~/images/qiglo-logo.png" alt="" /></span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation"
+                        aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div id="mainNavigation" class="collapse navbar-collapse">
+                    <ul class="navbar-nav qiglo-main-links me-auto align-items-xl-center">
+                        @if (showPublicNavigation)
+                        {
+                            <li class="nav-item"><a class="nav-link qiglo-nav-word @(isHome ? "is-current" : "")" asp-controller="Home" asp-action="Index">Home</a></li>
+                            <li class="nav-item"><a class="nav-link qiglo-nav-word @(isMenu ? "is-current" : "")" asp-controller="Menu" asp-action="Index">Menu</a></li>
+                            <li class="nav-item"><a class="nav-link qiglo-nav-word @(isAbout ? "is-current" : "")" asp-controller="Home" asp-action="About">About us</a></li>
+                        }
+
+                        @if (isCustomerUser)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="diningDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dining</a>
+                                <ul class="dropdown-menu" aria-labelledby="diningDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">My cart</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Reservations" asp-action="Index">My reservations</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">My orders</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Payments" asp-action="Index">My bills &amp; receipts</a></li>
+                                </ul>
+                            </li>
+                        }
+
+                        @if (isStaffUser)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="serviceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Service</a>
+                                <ul class="dropdown-menu" aria-labelledby="serviceDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Reservations" asp-action="Index">Reservations</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">Orders</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Payments" asp-action="Index">Billing &amp; receipts</a></li>
+                                </ul>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Staff") || isAdminUser || isKitchenUser)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="operationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Operations</a>
+                                <ul class="dropdown-menu" aria-labelledby="operationsDropdown">
+                                    @if (User.IsInRole("Staff") || isAdminUser)
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Tables" asp-action="Index">Table management</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Reservations" asp-action="WalkIn">Walk-in seating</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Reservations" asp-action="CheckIn">Guest check-in</a></li>
+                                    }
+                                    @if (isKitchenUser)
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Kitchen" asp-action="Index">Kitchen board</a></li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+
+                        @if (isAdminUser)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">Users</a></li>
+                                    <li><a class="dropdown-item" asp-controller="AdminMenuItems" asp-action="Index">Menu items</a></li>
+                                    <li><a class="dropdown-item" asp-controller="AdminCategories" asp-action="Index">Categories</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Reports">Reports</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Audit">Audit log</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="qiglo-account-area">
+                        @if (isAuthenticated)
+                        {
+                            <div class="qiglo-user-summary d-none d-xl-block">
+                                <strong>@User.Identity?.Name</strong>
+                                <span>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                            </div>
+                            @if (isCustomerUser)
+                            {
+                                <a class="btn btn-sm btn-outline-brand" asp-controller="Account" asp-action="Profile">My profile</a>
+                            }
+                            <form asp-controller="Account" asp-action="Logout" method="post"><button class="btn btn-sm btn-brand" type="submit">Logout</button></form>
+                        }
+                        else
+                        {
+                            <a class="qiglo-sign-in qiglo-user-button" asp-controller="Account" asp-action="Login">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"></circle><path d="M4.9 20c.75-3.35 3.2-5.1 7.1-5.1s6.35 1.75 7.1 5.1"></path></svg><span>Sign in</span>
+                            </a>
+                            <a class="qiglo-join-button" asp-controller="Account" asp-action="Register"><span>Join QIGLO</span><b aria-hidden="true">↗</b></a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="site-main container-xxl" role="main">@RenderBody()</main>
+
+    <footer class="site-footer no-print">
+        <div class="container-xxl">
+            <div class="row g-5 footer-content">
+                <div class="col-lg-4">
+                    <a class="footer-brand" asp-controller="Home" asp-action="Index">QIGLO</a>
+                    <p class="footer-intro">Fresh food, thoughtful service and a smoother dining experience—from reservation to e-receipt.</p>
+                    <div class="footer-hours"><span>Opening hours</span><strong>Daily · 10:00 AM – 10:00 PM</strong></div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h2>Explore</h2>
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li><a asp-controller="Menu" asp-action="Index">Food menu</a></li>
+                        <li><a asp-controller="Home" asp-action="About">About us</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h2>Contact</h2>
+                    <ul>
+                        <li><a href="tel:+60143539149">014-353 9149</a></li>
+                        <li><a href="tel:+60183852166">018-385 2166</a></li>
+                        <li><a href="tel:+601159902631">011-5990 2631</a></li>
+                        <li><a href="tel:+60183796063">018-379 6063</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h2>Team email</h2>
+                    <ul class="footer-email-list">
+                        <li><a href="mailto:keekm-wm25@student.tarc.edu.my">keekm-wm25@student.tarc.edu.my</a></li>
+                        <li><a href="mailto:chuaky-wm25@student.tarc.edu.my">chuaky-wm25@student.tarc.edu.my</a></li>
+                        <li><a href="mailto:wongjw-wm25@student.tarc.edu.my">wongjw-wm25@student.tarc.edu.my</a></li>
+                        <li><a href="mailto:seems-wm25@student.tarc.edu.my">seems-wm25@student.tarc.edu.my</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; @DateTime.Now.Year QIGLO Restaurant. All rights reserved.</span>
+                <span>Prepared fresh. Served with care.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

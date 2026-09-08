@@ -1,0 +1,81 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    var nameParts = Model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = string.Concat(nameParts.Take(2).Select(part => char.ToUpperInvariant(part[0])));
+    if (string.IsNullOrWhiteSpace(initials)) { initials = "Q"; }
+}
+
+<section class="profile-shell" aria-labelledby="profile-title">
+    <div class="profile-hero">
+        <div class="profile-avatar" aria-hidden="true">@initials</div>
+        <div class="profile-hero-copy">
+            <span class="eyebrow text-white">QIGLO customer account</span>
+            <h1 id="profile-title">@Model.FullName</h1>
+            <div class="profile-meta">
+                <span class="profile-status @(Model.IsActive ? "is-active" : "")">@(Model.IsActive ? "Active customer" : "Inactive account")</span>
+                <span>Member since @Model.CreatedAt.ToString("MMMM yyyy")</span>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success mt-4">@success</div>
+    }
+
+    <div class="profile-grid">
+        <div class="profile-card">
+            <div class="profile-card-heading">
+                <div>
+                    <span class="eyebrow">Personal details</span>
+                    <h2>Keep your contact details current.</h2>
+                </div>
+                <span class="profile-role">@Model.Role</span>
+            </div>
+
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="form-text">Receipts and booking confirmations use this address.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" placeholder="e.g. 012-345 6789" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        <div class="form-text">Staff may use this number for reservation updates.</div>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button class="btn btn-primary" type="submit">Save profile</button>
+                    <a class="btn btn-outline-secondary" asp-action="ChangePassword">Change password</a>
+                </div>
+            </form>
+        </div>
+
+        <aside class="profile-quick-card" aria-label="Customer shortcuts">
+            <span class="eyebrow text-white">Your dining hub</span>
+            <h2>Everything for your next QIGLO visit.</h2>
+            <nav class="profile-quick-links">
+                <a asp-controller="Reservations" asp-action="Index"><span>My reservations</span><b aria-hidden="true">→</b></a>
+                <a asp-controller="Orders" asp-action="Index"><span>My orders</span><b aria-hidden="true">→</b></a>
+                <a asp-controller="Payments" asp-action="Index"><span>My bills &amp; receipts</span><b aria-hidden="true">→</b></a>
+                <a asp-controller="Menu" asp-action="Index"><span>Explore the menu</span><b aria-hidden="true">→</b></a>
+            </nav>
+            <p>Use the same account when reserving so your booking, orders and receipt stay together.</p>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

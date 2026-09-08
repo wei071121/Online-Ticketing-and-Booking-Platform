@@ -1,0 +1,167 @@
+@model QigloRestaurant.Web.ViewModels.MenuDetailsViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = Model.Name;
+    var primary = Model.Photos.FirstOrDefault(x => x.IsPrimary) ?? Model.Photos.FirstOrDefault();
+    var primaryUrl = primary?.FileName ?? Url.Content("~/images/menu-placeholder.svg");
+    var invariantBasePrice = Model.Price.ToString("0.00", CultureInfo.InvariantCulture);
+}
+
+<partial name="_MenuAssets" />
+<partial name="_MenuNav" />
+
+<div class="menu-page">
+    <partial name="_MenuAlerts" />
+
+    <div class="mb-3">
+        <a asp-controller="Menu" asp-action="Index" class="menu-back-link">← Back to Menu</a>
+    </div>
+
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-6">
+            <div class="menu-detail-photo-wrap">
+                <img id="menu-main-photo"
+                     src="@primaryUrl"
+                     class="img-fluid rounded-4 shadow-sm w-100 menu-detail-main"
+                     alt="@Model.Name"
+                     onerror="this.onerror=null;this.src='/images/menu-placeholder.svg';" />
+                @if (Model.IsAvailable)
+                {
+                    <span class="menu-availability-pill">Available</span>
+                }
+                else
+                {
+                    <span class="menu-availability-pill soldout">Sold Out</span>
+                }
+            </div>
+
+            @if (Model.Photos.Count > 1)
+            {
+                <div class="row g-2 mt-2" id="menu-gallery">
+                    @foreach (var photo in Model.Photos)
+                    {
+                        <div class="col-3">
+                            <button type="button" class="menu-gallery-button @(photo.FileName == primaryUrl ? "active" : "")" data-photo-src="@photo.FileName">
+                                <img src="@photo.FileName"
+                                     class="img-fluid rounded menu-gallery-thumb"
+                                     alt="@Model.Name photo"
+                                     onerror="this.onerror=null;this.src='/images/menu-placeholder.svg';" />
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-6 menu-detail-copy">
+            <span class="menu-section-kicker">@Model.CategoryName</span>
+            <h1>@Model.Name</h1>
+            <div class="menu-detail-price mb-3">RM @Model.Price.ToString("0.00")</div>
+            <p class="menu-detail-description">@Model.Description</p>
+
+            <div class="menu-detail-meta mb-4">
+                <span>Freshly prepared</span>
+                <span>In-house dining</span>
+                <span>@Model.AddOns.Count customization option(s)</span>
+            </div>
+
+            @if (!Model.IsAvailable)
+            {
+                <div class="alert alert-danger">This item is currently sold out. Please choose another item from the menu.</div>
+                <a asp-controller="Menu" asp-action="Index" class="btn btn-dark">Browse Other Food</a>
+            }
+            else if (User.IsInRole("Customer"))
+            {
+                <form id="menu-customize-form"
+                      asp-controller="Cart"
+                      asp-action="Add"
+                      method="post"
+                      class="card menu-surface menu-customize-panel p-4"
+                      data-base-price="@invariantBasePrice">
+                    <input type="hidden" name="MenuItemId" value="@Model.MenuItemId" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="menu-section-kicker">MAKE IT YOURS</span>
+                            <h2 class="h5 mb-0">Customize your meal</h2>
+                        </div>
+                        <span class="menu-option-count">@Model.AddOns.Count options</span>
+                    </div>
+
+                    @if (Model.AddOns.Count > 0)
+                    {
+                        <div class="mb-3">
+                            @foreach (var addOn in Model.AddOns)
+                            {
+                                var invariantAddOnPrice = addOn.ExtraPrice.ToString("0.00", CultureInfo.InvariantCulture);
+                                <label class="menu-addon-option d-flex justify-content-between align-items-center rounded p-3 mb-2">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <input class="form-check-input menu-addon-check"
+                                               type="checkbox"
+                                               name="SelectedAddOnIds"
+                                               value="@addOn.AddOnId"
+                                               data-price="@invariantAddOnPrice" />
+                                        <strong>@addOn.Name</strong>
+                                    </span>
+                                    <span class="menu-addon-price">@(addOn.ExtraPrice == 0 ? "Free" : $"+ RM {addOn.ExtraPrice:0.00}")</span>
+                                </label>
+                            }
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label" for="menu-special-instructions">Special Instructions</label>
+                        <textarea id="menu-special-instructions"
+                                  name="SpecialInstructions"
+                                  maxlength="300"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Example: less sauce, no ice, sauce on the side..."></textarea>
+                        <div class="form-text">Optional, maximum 300 characters.</div>
+                    </div>
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="menu-quantity">Quantity</label>
+                            <input id="menu-quantity" name="Quantity" type="number" min="1" max="20" value="1" class="form-control form-control-lg" />
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="menu-total-preview">
+                                <span>Estimated Total</span>
+                                <strong id="menu-live-total">RM @Model.Price.ToString("0.00")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark btn-lg w-100 mt-3">Add to Cart</button>
+                </form>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <div class="card menu-surface p-4 menu-login-prompt">
+                    <h2 class="h5">Ready to order?</h2>
+                    <p class="text-muted">You can browse the menu as a guest. Log in as the demo customer to customize and add food to the cart.</p>
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       asp-route-returnUrl="@Url.Action("Details", "Menu", new { id = Model.MenuItemId })"
+                       class="btn btn-dark">Login to Order</a>
+                </div>
+            }
+            else
+            {
+                <div class="card menu-surface p-4">
+                    <h2 class="h5">Menu Preview</h2>
+                    <p class="text-muted mb-3">Ordering is available to Customer accounts. Your current role can still preview the complete menu.</p>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="AdminMenuItems" asp-action="Edit" asp-route-id="@Model.MenuItemId" class="btn btn-dark">Edit This Menu Item</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/menu-details.js" asp-append-version="true"></script>
+}

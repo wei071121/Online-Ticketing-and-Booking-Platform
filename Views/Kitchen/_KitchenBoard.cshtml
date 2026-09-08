@@ -1,0 +1,64 @@
+@model IEnumerable<Order>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No active kitchen orders. Everything is up to date.</div>
+}
+else
+{
+    <div class="kitchen-grid">
+    @foreach (var order in Model)
+    {
+        <article class="card border-0 shadow-sm kitchen-ticket">
+            <div class="card-header bg-white d-flex justify-content-between align-items-start">
+                <div>
+                    <strong>@order.OrderNumber</strong>
+                    <div class="kitchen-ticket-table">Table @order.DiningSession.DiningTable.TableNumber</div>
+                </div>
+                <span class="status-badge status-@order.Status.ToLowerInvariant()">@order.Status</span>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-3">
+                @foreach (var item in order.OrderItems)
+                {
+                    <li class="mb-2">
+                        <strong>@item.Quantity × @item.MenuItemName</strong>
+                        @if (item.OrderItemAddOns.Count > 0)
+                        {
+                            <div class="small text-secondary">+ @string.Join(", ", item.OrderItemAddOns.Select(addOn => addOn.AddOnName))</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.SpecialRequest))
+                        {
+                            <div class="small text-danger">@item.SpecialRequest</div>
+                        }
+                    </li>
+                }
+                </ul>
+
+                <div class="d-flex flex-wrap gap-2">
+                    @if (order.Status == "Pending")
+                    {
+                        <button type="button" class="btn btn-sm btn-primary kitchen-status-button"
+                                data-order-id="@order.OrderId" data-new-status="Preparing">Start preparing</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger kitchen-status-button"
+                                data-order-id="@order.OrderId" data-new-status="Cancelled">Cancel</button>
+                    }
+                    else if (order.Status == "Preparing")
+                    {
+                        <button type="button" class="btn btn-sm btn-primary kitchen-status-button"
+                                data-order-id="@order.OrderId" data-new-status="Ready">Mark ready</button>
+                    }
+                    else if (order.Status == "Ready")
+                    {
+                        <button type="button" class="btn btn-sm btn-success kitchen-status-button"
+                                data-order-id="@order.OrderId" data-new-status="Served">Mark served</button>
+                    }
+                </div>
+            </div>
+            <div class="card-footer bg-white small text-secondary">
+                Waiting @Math.Max(0, (int)(DateTime.Now - order.OrderedAt).TotalMinutes) minute(s)
+            </div>
+        </article>
+    }
+    </div>
+}

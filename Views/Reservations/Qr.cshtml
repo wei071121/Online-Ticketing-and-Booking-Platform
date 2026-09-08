@@ -1,0 +1,68 @@
+@model Reservation
+@{
+    var isConfirmed = Model.Status == "Confirmed";
+    ViewData["Title"] = isConfirmed ? "Reservation confirmed" : "Reservation request received";
+}
+
+<section class="reservation-confirmation">
+    <div class="confirmation-banner">
+        <div class="confirmation-check" aria-hidden="true">✓</div>
+        <span class="eyebrow text-white">QIGLO booking</span>
+        <h1>@(isConfirmed ? "Your reservation is confirmed." : "Your reservation request is received.")</h1>
+        <p>@(isConfirmed ? "Please present this QR code and booking code to our staff when you arrive." : "Your booking code is ready. Staff approval is required before check-in.")</p>
+    </div>
+
+    <div class="confirmation-body">
+        <div class="booking-code-hero">
+            <div>
+                <span>Booking code</span>
+                <strong id="booking-code">@Model.BookingCode</strong>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="copy-booking-code" data-code="@Model.BookingCode">Copy code</button>
+        </div>
+
+        <div class="confirmation-details">
+            <div class="confirmation-detail"><span>Date</span><strong>@Model.StartAt.ToString("dddd, dd MMM yyyy")</strong></div>
+            <div class="confirmation-detail"><span>Arrival time</span><strong>@Model.StartAt.ToString("HH:mm") – @Model.EndAt.ToString("HH:mm")</strong></div>
+            <div class="confirmation-detail"><span>Guests</span><strong>@Model.Pax guest@(Model.Pax == 1 ? "" : "s")</strong></div>
+            <div class="confirmation-detail"><span>Table</span><strong>@(isConfirmed ? Model.DiningTable?.TableNumber ?? "To be assigned" : "Assigned after confirmation")</strong></div>
+        </div>
+
+        <div class="confirmation-qr">
+            <h2 class="h5 mb-1">Your check-in QR code</h2>
+            <p class="text-secondary small mb-1">Please present this QR code at check-in.</p>
+            <img src="@Url.Action("QrCode", new { id = Model.ReservationId })" alt="QR code for booking @Model.BookingCode" />
+            <p class="small text-secondary mb-0">Generated locally by QIGLO. Your booking code is not sent to a third party.</p>
+        </div>
+
+        @if (isConfirmed)
+        {
+            <p class="confirmation-email-note mt-3 mb-0">A reservation confirmation email has been sent to your registered email address.</p>
+        }
+        else
+        {
+            <p class="confirmation-email-note mt-3 mb-0">A confirmation email will be sent after staff approves this reservation.</p>
+        }
+
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-4 no-print">
+            <a class="btn btn-outline-secondary" asp-action="Index">My reservations</a>
+            <button class="btn btn-primary" type="button" onclick="window.print()">Print booking</button>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('copy-booking-code')?.addEventListener('click', async function () {
+            const button = this;
+            try {
+                await navigator.clipboard.writeText(button.dataset.code);
+                button.textContent = 'Copied';
+                window.setTimeout(() => button.textContent = 'Copy code', 1600);
+            } catch {
+                button.textContent = 'Copy unavailable';
+                window.setTimeout(() => button.textContent = 'Copy code', 1600);
+            }
+        });
+    </script>
+}

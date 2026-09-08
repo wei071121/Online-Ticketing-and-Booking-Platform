@@ -1,0 +1,62 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<section class="auth-shell" aria-labelledby="login-title">
+    <div class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-card-body">
+                <img class="auth-brand-logo" src="~/images/qiglo-logo.png" alt="QIGLO" />
+                <h1 id="login-title">Login</h1>
+                <p class="auth-lead">Welcome back. Enter your details to continue.</p>
+
+                @if (TempData["Success"] is string success)
+                {
+                    <div class="alert alert-success">@success</div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="username" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+                    </div>
+                    <button class="btn btn-primary w-100 auth-submit" type="submit">Login</button>
+                    <div class="d-flex justify-content-between mt-3 auth-links">
+                        <a asp-action="Register">Create customer account</a>
+                        <a asp-action="ForgotPassword">Forgot password?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="demo-accounts-compact">
+            <div>
+                <strong>Demo accounts</strong>
+                <ul>
+                    <li>Customer: customer@qiglo.test / Customer123!</li>
+                    <li>Staff: staff@qiglo.test / Staff123!</li>
+                    <li>Kitchen: kitchen@qiglo.test / Kitchen123!</li>
+                    <li>Admin: admin@qiglo.test / Admin123!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

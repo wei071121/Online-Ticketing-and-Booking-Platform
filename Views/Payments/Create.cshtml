@@ -1,0 +1,73 @@
+@model PaymentCreateViewModel
+@{
+    ViewData["Title"] = "Complete payment";
+}
+
+<div class="mb-4">
+    <h1 class="h2 mb-1">Complete payment</h1>
+    <p class="text-secondary mb-0">Dining session #@Model.DiningSessionId · Table @Model.TableNumber</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                @foreach (var line in Model.Lines)
+                {
+                    <div class="receipt-line">
+                        <div>
+                            <strong>@line.Quantity × @line.Description</strong>
+                            <div class="small text-secondary">RM @line.UnitPriceWithAddOns.ToString("0.00") each</div>
+                        </div>
+                        <span>RM @line.LineTotal.ToString("0.00")</span>
+                    </div>
+                }
+
+                <div class="billing-summary">
+                    <div><span>Subtotal</span><span>RM @Model.Subtotal.ToString("0.00")</span></div>
+                    <div><span>Tax (6%)</span><span>RM @Model.TaxAmount.ToString("0.00")</span></div>
+                    <div><span>Service charge (10%)</span><span>RM @Model.ServiceCharge.ToString("0.00")</span></div>
+                    <div class="billing-total"><strong>Total</strong><strong>RM @Model.TotalAmount.ToString("0.00")</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <input asp-for="DiningSessionId" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="PaymentMethod" class="form-label"></label>
+                        <select asp-for="PaymentMethod" class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="EWallet">E-wallet</option>
+                        </select>
+                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="AmountReceived" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">RM</span>
+                            <input asp-for="AmountReceived" class="form-control" step="0.01"
+                                   min="@Model.TotalAmount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                   aria-describedby="amount-received-help" />
+                        </div>
+                        <div id="amount-received-help" class="form-text">
+                            Minimum amount: RM @Model.TotalAmount.ToString("0.00")
+                        </div>
+                        <span asp-validation-for="AmountReceived" class="text-danger"></span>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Complete payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,54 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<section class="auth-shell auth-shell-register" aria-labelledby="register-title">
+    <div class="auth-panel auth-panel-wide">
+        <div class="auth-card">
+            <div class="auth-card-body">
+                <img class="auth-brand-logo" src="~/images/qiglo-logo.png" alt="QIGLO" />
+                <h1 id="register-title">Create Your Account</h1>
+                <p class="auth-lead">Reserve tables, follow orders and keep your receipts in one place.</p>
+
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <p class="form-text mt-2">At least 8 characters with uppercase, lowercase, number and symbol.</p>
+                    <button class="btn btn-primary w-100 mt-3 auth-submit" type="submit">Create Account</button>
+                    <div class="text-center mt-3 auth-links"><a asp-action="Login">Already registered? Login</a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

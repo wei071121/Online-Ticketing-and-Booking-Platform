@@ -1,0 +1,142 @@
+@model QigloRestaurant.Web.ViewModels.MenuItemFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+<div class="menu-form-section">
+    <div class="menu-form-section-heading">
+        <span>01</span>
+        <div>
+            <h3 class="h5 mb-1">Food Information</h3>
+            <p class="text-muted mb-0">Basic details customers will see on the menu.</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" placeholder="Example: Grilled Chicken Chop" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="CategoryId" class="form-label"></label>
+            <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                <option value="">-- Select category --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Price" class="form-label"></label>
+            <div class="input-group">
+                <span class="input-group-text">RM</span>
+                <input asp-for="Price" class="form-control" type="number" min="0.01" step="0.01" />
+            </div>
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe the dish, sauce and sides..."></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <div class="form-check form-switch menu-availability-switch">
+                <input asp-for="IsAvailable" class="form-check-input" />
+                <label asp-for="IsAvailable" class="form-check-label">Available for customer ordering</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="menu-form-section">
+    <div class="menu-form-section-heading">
+        <span>02</span>
+        <div>
+            <h3 class="h5 mb-1">Food Photos</h3>
+            <p class="text-muted mb-0">Upload clear photos so the customer menu does not look empty.</p>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <label asp-for="Photos" class="form-label"></label>
+        <input asp-for="Photos"
+               id="menu-photo-input"
+               class="form-control"
+               type="file"
+               multiple
+               accept=".jpg,.jpeg,.png,.webp" />
+        <div class="form-text">Up to 6 photos per food item, maximum 5 MB each. JPG, PNG and WEBP supported.</div>
+        <span asp-validation-for="Photos" class="text-danger"></span>
+        <div id="menu-photo-preview" class="menu-photo-preview-grid mt-3"></div>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="menu-form-section">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+        <div class="menu-form-section-heading mb-0">
+            <span>03</span>
+            <div>
+                <h3 class="h5 mb-1">Customization / Add-ons</h3>
+                <p class="text-muted mb-0">Examples: Extra Cheese, Extra Fries, Sunny Side Egg.</p>
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-dark" id="add-addon-btn">+ Add Option</button>
+    </div>
+
+    <div id="addon-list" class="mt-3">
+        @for (var i = 0; i < Model.AddOns.Count; i++)
+        {
+            <div class="addon-row menu-addon-row rounded p-3 mb-2">
+                <input asp-for="AddOns[i].AddOnId" type="hidden" />
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="form-label">Name</label>
+                        <input asp-for="AddOns[i].Name" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Extra Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">RM</span>
+                            <input asp-for="AddOns[i].ExtraPrice" class="form-control" type="number" step="0.01" min="0" />
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end gap-3">
+                        <div class="form-check mb-2">
+                            <input asp-for="AddOns[i].IsAvailable" class="form-check-input" />
+                            <label class="form-check-label">Available</label>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-addon mb-1">Remove</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/template" id="addon-template">
+    <div class="addon-row menu-addon-row rounded p-3 mb-2">
+        <div class="row g-2">
+            <div class="col-md-5">
+                <label class="form-label">Name</label>
+                <input name="AddOns[__index__].Name" class="form-control" placeholder="Example: Extra Cheese" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Extra Price</label>
+                <div class="input-group">
+                    <span class="input-group-text">RM</span>
+                    <input name="AddOns[__index__].ExtraPrice" class="form-control" type="number" step="0.01" min="0" value="0" />
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-3">
+                <div class="form-check mb-2">
+                    <input name="AddOns[__index__].IsAvailable" value="true" type="checkbox" class="form-check-input" checked />
+                    <input name="AddOns[__index__].IsAvailable" value="false" type="hidden" />
+                    <label class="form-check-label">Available</label>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-addon mb-1">Remove</button>
+            </div>
+        </div>
+    </div>
+</script>

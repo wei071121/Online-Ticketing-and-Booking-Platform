@@ -1,0 +1,66 @@
+@model Payment
+@{
+    ViewData["Title"] = "Receipt";
+}
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success no-print">@success</div>
+}
+@if (TempData["EmailStatus"] is string emailStatus)
+{
+    <div class="alert alert-info no-print">@emailStatus</div>
+}
+
+<div class="receipt-document">
+    <div class="text-center mb-4">
+        <h1 class="h2 mb-1">QIGLO Restaurant</h1>
+        <p class="text-secondary mb-0">E-receipt</p>
+    </div>
+
+    <dl class="row small">
+        <dt class="col-5">Receipt</dt><dd class="col-7 text-end">@Model.ReceiptNumber</dd>
+        <dt class="col-5">Table</dt><dd class="col-7 text-end">@Model.DiningSession.DiningTable.TableNumber</dd>
+        <dt class="col-5">Paid</dt><dd class="col-7 text-end">@Model.PaidAt?.ToString("dd MMM yyyy HH:mm")</dd>
+        <dt class="col-5">Processed by</dt><dd class="col-7 text-end">@Model.ProcessedByUser?.FullName</dd>
+    </dl>
+
+    @foreach (var order in Model.DiningSession.Orders.OrderBy(item => item.OrderedAt))
+    {
+        <h2 class="h6 mt-4">@order.OrderNumber</h2>
+        @foreach (var item in order.OrderItems)
+        {
+            <div class="receipt-line">
+                <div>
+                    <strong>@item.Quantity × @item.MenuItemName</strong>
+                    @if (item.OrderItemAddOns.Count > 0)
+                    {
+                        <div class="small text-secondary">@string.Join(", ", item.OrderItemAddOns.Select(addOn => addOn.AddOnName))</div>
+                    }
+                </div>
+                <span>RM @item.LineSubtotal.ToString("0.00")</span>
+            </div>
+        }
+    }
+
+    <div class="billing-summary mt-4">
+        <div><span>Subtotal</span><span>RM @Model.Subtotal.ToString("0.00")</span></div>
+        <div><span>Tax</span><span>RM @Model.TaxAmount.ToString("0.00")</span></div>
+        <div><span>Service charge</span><span>RM @Model.ServiceCharge.ToString("0.00")</span></div>
+        <div class="billing-total"><strong>Total</strong><strong>RM @Model.TotalAmount.ToString("0.00")</strong></div>
+        <div><span>@Model.PaymentMethod received</span><span>RM @Model.AmountReceived.ToString("0.00")</span></div>
+        <div><span>Change</span><span>RM @Model.ChangeAmount.ToString("0.00")</span></div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center flex-wrap gap-2 mt-4 no-print">
+    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Print</button>
+    <a asp-action="Pdf" asp-route-id="@Model.PaymentId" class="btn btn-primary">Download PDF</a>
+    @if (User.IsInRole("Staff") || User.IsInRole("Admin"))
+    {
+        <form asp-action="ResendEmail" asp-route-id="@Model.PaymentId" method="post">
+            <button type="submit" class="btn btn-outline-primary">Send e-receipt again</button>
+        </form>
+    }
+</div>
+

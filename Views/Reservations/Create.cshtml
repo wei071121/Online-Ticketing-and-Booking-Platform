@@ -1,0 +1,100 @@
+@model CreateReservationViewModel
+@{
+    ViewData["Title"] = "Reserve a table";
+    var minimumDate = DateTime.Today.ToString("yyyy-MM-dd");
+    var maximumDate = DateTime.Today.AddDays(60).ToString("yyyy-MM-dd");
+}
+
+<div class="reservation-shell">
+    <div class="reservation-heading">
+        <span class="eyebrow">QIGLO table reservation</span>
+        <h1>Reserve your table.</h1>
+        <p class="text-secondary mb-0">Tell us your party size, choose an available time and we will arrange the best-fit table for you.</p>
+    </div>
+
+    <div class="reservation-wizard-card card border-0">
+        <ol class="reservation-progress list-unstyled mb-0" aria-label="Reservation steps">
+            <li class="reservation-progress-item is-active" data-progress-step="1"><span>1</span>Visit details</li>
+            <li class="reservation-progress-item" data-progress-step="2"><span>2</span>Choose a time</li>
+            <li class="reservation-progress-item" data-progress-step="3"><span>3</span>Confirm</li>
+        </ol>
+
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="reservation-wizard" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input asp-for="ReservationTime" type="hidden" />
+                <input asp-for="DurationMinutes" type="hidden" value="120" />
+
+                <section class="reservation-step is-active" data-step="1">
+                    <h2 class="reservation-step-title">When are you joining us?</h2>
+                    <p class="reservation-step-copy">Choose the date and total number of guests, including children.</p>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="ReservationDate" class="form-label"></label>
+                            <input asp-for="ReservationDate" type="date" min="@minimumDate" max="@maximumDate" class="form-control" />
+                            <span asp-validation-for="ReservationDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Pax" class="form-label">Number of guests</label>
+                            <select asp-for="Pax" class="form-select">
+                                @for (var guests = 1; guests <= 12; guests++)
+                                {
+                                    <option value="@guests">@guests guest@(guests == 1 ? "" : "s")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Pax" class="text-danger"></span>
+                            <div class="form-text">For parties above 12, please contact QIGLO directly.</div>
+                        </div>
+                    </div>
+                    <div class="reservation-note-box mt-4">
+                        You do not need to choose a table number. QIGLO automatically reserves the smallest suitable available table so larger tables remain open for larger parties.
+                    </div>
+                    <div class="wizard-feedback" data-step-feedback="1" aria-live="polite"></div>
+                    <div class="wizard-actions">
+                        <span></span>
+                        <div class="wizard-actions-end"><button type="button" class="btn btn-primary wizard-check-availability">Find a time</button></div>
+                    </div>
+                </section>
+
+                <section class="reservation-step" data-step="2">
+                    <h2 class="reservation-step-title">Choose a time.</h2>
+                    <p class="reservation-step-copy">Only times with a suitable table are shown. Dining time is reserved for two hours.</p>
+                    <div id="availability-panel" data-url="@Url.Action("AvailabilityJson")" data-mode="reservation">
+                        <div id="availability-message" class="availability-summary">
+                            <span class="availability-summary-icon" aria-hidden="true">⌕</span>
+                            <span>Choose your visit details to view available times.</span>
+                        </div>
+                        <div id="available-time-slots" class="reservation-time-grid mt-3" aria-live="polite"></div>
+                    </div>
+                    <span asp-validation-for="ReservationTime" class="text-danger d-block mt-2"></span>
+                    <div class="wizard-feedback" data-step-feedback="2" aria-live="polite"></div>
+                    <div class="wizard-actions">
+                        <button type="button" class="btn btn-outline-secondary wizard-back" data-previous-step="1">Back</button>
+                        <div class="wizard-actions-end"><button type="button" class="btn btn-primary wizard-next" data-next-step="3">Continue</button></div>
+                    </div>
+                </section>
+
+                <section class="reservation-step" data-step="3">
+                    <h2 class="reservation-step-title">Review your visit.</h2>
+                    <p class="reservation-step-copy">Check the details and add an optional request before submitting.</p>
+                    <div id="selected-visit-summary" class="reservation-review-card mb-4"></div>
+                    <div class="reservation-note-box mb-3">Your request receives a unique booking code. Staff will confirm the reservation and your assigned table before check-in.</div>
+                    <div>
+                        <label asp-for="Notes" class="form-label">Special request <span class="text-secondary fw-normal">(optional)</span></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4" placeholder="For example: wheelchair access, high chair, birthday or quieter seating"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                    <div class="wizard-actions">
+                        <button type="button" class="btn btn-outline-secondary wizard-back" data-previous-step="2">Back</button>
+                        <div class="wizard-actions-end"><a asp-action="Index" class="btn btn-outline-secondary">Cancel</a><button class="btn btn-primary" type="submit">Request reservation</button></div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/reservations/table-availability.js" asp-append-version="true"></script>
+}
