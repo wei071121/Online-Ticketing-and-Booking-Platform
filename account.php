@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'passwor
 
     if (!password_verify($current, $row['password_hash'])) {
         $passwordError = 'Current password is incorrect.';
-    } elseif (strlen($new) < 6) {
-        $passwordError = 'New password must be at least 6 characters.';
+    } elseif (strlen($new) < 8) {
+        $passwordError = 'New password must be at least 8 characters.';
     } elseif ($new !== $confirm) {
         $passwordError = 'New passwords do not match.';
     } else {
@@ -103,19 +103,19 @@ require 'partials/header.php';
 <input type="hidden" name="form" value="password">
 <label>Current Password <span class="required-mark">*</span>
 <div class="password-field">
-<input type="password" name="current_password" required>
+<input type="password" name="current_password" autocomplete="current-password" required>
 <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password"></button>
 </div>
 </label>
 <label>New Password <span class="required-mark">*</span>
 <div class="password-field">
-<input type="password" name="new_password" required>
+<input type="password" name="new_password" minlength="8" autocomplete="new-password" required>
 <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password"></button>
 </div>
 </label>
 <label>Confirm New Password <span class="required-mark">*</span>
 <div class="password-field">
-<input type="password" name="confirm_password" required>
+<input type="password" name="confirm_password" minlength="8" autocomplete="new-password" required>
 <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password"></button>
 </div>
 </label>

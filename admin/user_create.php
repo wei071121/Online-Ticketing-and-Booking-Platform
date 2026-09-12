@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Name, email and password are required.';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
+    } elseif (strlen($password) < 8) {
+        $error = 'Password must be at least 8 characters.';
     } else {
         $stmt = $conn->prepare('SELECT id FROM users WHERE email = ?');
         $stmt->bind_param('s', $email);
@@ -51,13 +51,13 @@ promotion needed.</p>
 <label>Email <input type="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required></label>
 <label>Password
 <div class="password-field">
-<input type="password" name="password" required>
+<input type="password" name="password" minlength="8" autocomplete="new-password" required>
 <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password"></button>
 </div>
 </label>
 <label>Confirm Password
 <div class="password-field">
-<input type="password" name="confirm_password" required>
+<input type="password" name="confirm_password" minlength="8" autocomplete="new-password" required>
 <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password"></button>
 </div>
 </label>
