@@ -1,0 +1,37 @@
+name: Validate application and Terraform
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check PHP syntax
+        run: |
+          find . -type f -name '*.php' -not -path './.git/*' -print0 |
+            xargs -0 -r -n1 php -l
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.2
+
+      - name: Check Terraform formatting
+        run: terraform -chdir=terraform fmt -check
+
+      - name: Initialize Terraform without backend
+        run: terraform -chdir=terraform init -backend=false -input=false
+
+      - name: Validate Terraform
+        run: terraform -chdir=terraform validate
